@@ -3,22 +3,30 @@ import requests
 import re
 from typing import List, Optional
 
-st.set_page_config(page_title="TikTok Video Downloader", layout="centered")
+# ------------------ PAGE CONFIG ------------------
+st.set_page_config(
+    page_title="TikTok Video Downloader",
+    layout="centered"
+)
 
 st.title("TikTok Video Downloader")
 st.caption("Download public TikTok videos. One click per video.")
 
-# ---------- INPUT ----------
+# ------------------ INPUT ------------------
 links_text = st.text_area(
     "Paste TikTok links (one per line)",
-    height=180,
-    placeholder="https://vt.tiktok.com/...\nhttps://www.tiktok.com/@user/video/..."
+    height=200,
+    placeholder=(
+        "https://vt.tiktok.com/...\n"
+        "https://www.tiktok.com/@username/video/1234567890"
+    )
 )
 
 process_btn = st.button("Process Links")
 
-# ---------- HELPERS ----------
+# ------------------ HELPERS ------------------
 def normalize_links(text: str) -> List[str]:
+    """Extract valid-looking URLs from input"""
     return [
         line.strip()
         for line in text.splitlines()
@@ -26,7 +34,7 @@ def normalize_links(text: str) -> List[str]:
     ]
 
 def resolve_tiktok_url(url: str) -> str:
-    """Resolve short TikTok URLs to canonical form"""
+    """Resolve short TikTok URLs (vt.tiktok.com, t.tiktok.com)"""
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(
         url,
@@ -54,17 +62,19 @@ def extract_video_id(url: str) -> Optional[str]:
 
     return None
 
-# ---------- MAIN ----------
+# ------------------ MAIN LOGIC ------------------
 if process_btn:
     links = normalize_links(links_text)
 
     if not links:
-        st.warning("No valid links found.")
+        st.warning("No valid TikTok links found.")
         st.stop()
 
     st.info(f"Processing {len(links)} links...")
 
     for idx, link in enumerate(links, start=1):
+        st.divider()
+
         try:
             resolved_url = resolve_tiktok_url(link)
             video_id = extract_video_id(resolved_url)
@@ -75,13 +85,25 @@ if process_btn:
                 continue
 
             st.success(f"{idx}. Video ID extracted")
-            st.code(video_id)
+            st.write(f"**Video ID:** `{video_id}`")
             st.caption(resolved_url)
 
-            # NEXT STEP:
-            # Send `video_id` or `resolved_url` to your backend
-            # which returns a downloadable media URL
+            # ------------------------------
+            # PLACEHOLDER FOR BACKEND CALL
+            # ------------------------------
+            # Example expected backend response:
+            # {
+            #   "title": "Video title",
+            #   "download_url": "https://cdn.example.com/video.mp4",
+            #   "filename": "video.mp4"
+            # }
+
+            st.warning("Download not available yet (backend not connected)")
+
+        except requests.exceptions.RequestException:
+            st.error(f"{idx}. Network error while resolving link")
+            st.caption(link)
 
         except Exception as e:
-            st.error(f"{idx}. Failed to process link")
-            st.caption(link)
+            st.error(f"{idx}. Unexpected error")
+            st.caption(str(e))
