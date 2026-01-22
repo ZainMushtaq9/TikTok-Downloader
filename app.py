@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import re
 from typing import List, Optional
+import time
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
@@ -26,7 +27,6 @@ process_btn = st.button("Process Links")
 
 # ------------------ HELPERS ------------------
 def normalize_links(text: str) -> List[str]:
-    """Extract valid-looking URLs from input"""
     return [
         line.strip()
         for line in text.splitlines()
@@ -34,7 +34,6 @@ def normalize_links(text: str) -> List[str]:
     ]
 
 def resolve_tiktok_url(url: str) -> str:
-    """Resolve short TikTok URLs (vt.tiktok.com, t.tiktok.com)"""
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(
         url,
@@ -45,24 +44,33 @@ def resolve_tiktok_url(url: str) -> str:
     return response.url
 
 def extract_video_id(url: str) -> Optional[str]:
-    """
-    Supports:
-    - https://www.tiktok.com/@username/video/1234567890
-    - https://www.tiktok.com/video/1234567890
-    """
     patterns = [
         r"/@[^/]+/video/(\d+)",
         r"/video/(\d+)"
     ]
-
     for pattern in patterns:
         match = re.search(pattern, url)
         if match:
             return match.group(1)
-
     return None
 
-# ------------------ MAIN LOGIC ------------------
+# ------------------ MOCK BACKEND ------------------
+def mock_backend(video_id: str) -> dict:
+    """
+    This simulates a backend response.
+    Replace this function later with a real API call.
+    """
+    time.sleep(0.5)  # simulate processing delay
+
+    fake_video_bytes = b"FAKE MP4 DATA - REPLACE WITH REAL VIDEO STREAM"
+
+    return {
+        "title": f"TikTok Video {video_id}",
+        "file_bytes": fake_video_bytes,
+        "filename": f"{video_id}.mp4"
+    }
+
+# ------------------ MAIN ------------------
 if process_btn:
     links = normalize_links(links_text)
 
@@ -84,24 +92,22 @@ if process_btn:
                 st.caption(resolved_url)
                 continue
 
-            st.success(f"{idx}. Video ID extracted")
+            st.success(f"{idx}. Video ready")
             st.write(f"**Video ID:** `{video_id}`")
             st.caption(resolved_url)
 
-            # ------------------------------
-            # PLACEHOLDER FOR BACKEND CALL
-            # ------------------------------
-            # Example expected backend response:
-            # {
-            #   "title": "Video title",
-            #   "download_url": "https://cdn.example.com/video.mp4",
-            #   "filename": "video.mp4"
-            # }
+            # -------- CALL MOCK BACKEND --------
+            backend_data = mock_backend(video_id)
 
-            st.warning("Download not available yet (backend not connected)")
+            st.download_button(
+                label=f"Download Video {idx}",
+                data=backend_data["file_bytes"],
+                file_name=backend_data["filename"],
+                mime="video/mp4"
+            )
 
         except requests.exceptions.RequestException:
-            st.error(f"{idx}. Network error while resolving link")
+            st.error(f"{idx}. Network error")
             st.caption(link)
 
         except Exception as e:
