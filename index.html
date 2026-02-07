@@ -3,416 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free social media video downloader. Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat, and Likee. Fast, secure, and no login required.">
-    <meta name="keywords" content="social media video downloader, online video downloader, free online video downloader, download videos without app, all in one video downloader">
-    <meta name="author" content="VideoDownloader">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Social Media Video Downloader - Download from Any Platform Free">
-    <meta property="og:description" content="Download videos from YouTube, TikTok, Instagram, Facebook, and more. Fast, reliable, and completely free online video downloader.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yoursite.com">
-    <link rel="canonical" href="https://yoursite.com">
-    <title>Social Media Video Downloader | Free Online Video Download Tool</title>
+    <meta name="description" content="Free online video downloader supporting YouTube, TikTok, Instagram, Facebook, Twitter, and more. Download videos in HD quality without login.">
+    <title>Video Downloader - Download from Any Platform Free</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Video Downloader",
-        "description": "Free online video downloader for social media platforms",
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Any",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        }
-    }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-theme="dark">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="theme-icon sun">☀️</span>
+        <span class="theme-icon moon">🌙</span>
+    </button>
+
     <!-- Header -->
-    <header class="header">
+    <header class="header-welcome">
         <div class="container">
-            <div class="header-content">
-                <a href="index.html" class="logo">
-                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 4L4 10V22L16 28L28 22V10L16 4Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-                        <path d="M12 14L20 14M16 10L16 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>VideoDownloader</span>
-                </a>
-                <nav class="nav">
-                    <a href="index.html" class="nav-link active">Home</a>
-                    <a href="youtube.html" class="nav-link">YouTube</a>
-                    <a href="tiktok.html" class="nav-link">TikTok</a>
-                    <a href="instagram.html" class="nav-link">Instagram</a>
-                    <a href="about.html" class="nav-link">About</a>
-                </nav>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+            <div class="logo-welcome">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 4L4 10V22L16 28L28 22V10L16 4Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M12 14L20 14M16 10L16 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h1>Video Downloader</h1>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <a href="index.html" class="mobile-menu-link">Home</a>
-        <a href="youtube.html" class="mobile-menu-link">YouTube</a>
-        <a href="tiktok.html" class="mobile-menu-link">TikTok</a>
-        <a href="instagram.html" class="mobile-menu-link">Instagram</a>
-        <a href="facebook.html" class="mobile-menu-link">Facebook</a>
-        <a href="twitter.html" class="mobile-menu-link">Twitter</a>
-        <a href="about.html" class="mobile-menu-link">About</a>
-    </div>
-
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero-welcome">
         <div class="container">
-            <h1 class="hero-title">Social Media Video Downloader</h1>
-            <p class="hero-subtitle">Download videos from any platform instantly. Free online video downloader with no login required. Support for YouTube playlists, TikTok profiles, Instagram reels, and more.</p>
+            <div class="hero-content">
+                <h2 class="hero-title-large">Download Videos<br>From Any Platform</h2>
+                <p class="hero-subtitle-large">Free, fast, and powerful video downloader supporting YouTube, TikTok, Instagram, Facebook, Twitter, and more. No login required.</p>
+                <div class="hero-features">
+                    <div class="feature-badge neon-border">⚡ Lightning Fast</div>
+                    <div class="feature-badge neon-border">🔓 No Login</div>
+                    <div class="feature-badge neon-border">💯 100% Free</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Grid -->
+    <section class="tools-section">
+        <div class="container">
+            <h2 class="section-title-center">Choose Your Platform</h2>
+            <p class="section-subtitle-center">Select a platform to start downloading videos instantly</p>
             
-            <!-- URL Input -->
-            <div class="url-input-container">
-                <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="urlInput" 
-                        class="url-input" 
-                        placeholder="Paste video URL here (YouTube, TikTok, Instagram, Facebook, Twitter...)"
-                        autocomplete="off"
-                        aria-label="Video URL input"
-                    />
-                    <button id="analyzeBtn" class="btn-analyze" aria-label="Analyze video">
-                        <span class="btn-text">Download</span>
-                        <span class="btn-loader" style="display: none;">
-                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="32" stroke-dashoffset="32">
-                                    <animate attributeName="stroke-dashoffset" dur="1s" from="32" to="0" repeatCount="indefinite"/>
-                                </circle>
-                            </svg>
-                        </span>
-                    </button>
-                </div>
-                <div id="urlError" class="error-message" style="display: none;"></div>
-                <p class="input-hint">✓ Fast video downloader online • ✓ No app installation • ✓ Browser based video downloader</p>
-            </div>
+            <div class="tools-grid">
+                <a href="youtube.html" class="tool-card neon-glow">
+                    <div class="tool-icon youtube">YT</div>
+                    <h3>YouTube</h3>
+                    <p>Videos, playlists & channels</p>
+                    <span class="tool-tag">4K Support</span>
+                </a>
 
-            <!-- Platform Badges -->
-            <div class="platform-badges">
-                <a href="youtube.html" class="badge">YouTube</a>
-                <a href="tiktok.html" class="badge">TikTok</a>
-                <a href="instagram.html" class="badge">Instagram</a>
-                <a href="facebook.html" class="badge">Facebook</a>
-                <a href="twitter.html" class="badge">Twitter</a>
-                <span class="badge">Snapchat</span>
-                <span class="badge">Likee</span>
-            </div>
-        </div>
-    </section>
+                <a href="tiktok.html" class="tool-card neon-glow">
+                    <div class="tool-icon tiktok">TT</div>
+                    <h3>TikTok</h3>
+                    <p>Videos & profiles</p>
+                    <span class="tool-tag">No Watermark</span>
+                </a>
 
-    <!-- Video List Section -->
-    <section id="videoListSection" class="video-list-section" style="display: none;">
-        <div class="container">
-            <!-- Playlist Header -->
-            <div id="playlistHeader" class="playlist-header" style="display: none;">
-                <h2 id="playlistTitle" class="playlist-title"></h2>
-                <p id="playlistInfo" class="playlist-info"></p>
-            </div>
+                <a href="instagram.html" class="tool-card neon-glow">
+                    <div class="tool-icon instagram">IG</div>
+                    <h3>Instagram</h3>
+                    <p>Reels, videos & stories</p>
+                    <span class="tool-tag">HD Quality</span>
+                </a>
 
-            <!-- Controls Bar -->
-            <div class="controls-bar">
-                <div class="controls-left">
-                    <button id="selectAllBtn" class="btn-control" aria-label="Select all videos">
-                        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                            <rect x="2" y="2" width="14" height="14" stroke="currentColor" stroke-width="2" rx="2"/>
-                            <path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Select All
-                    </button>
-                    <button id="deselectAllBtn" class="btn-control" aria-label="Deselect all videos">
-                        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                            <rect x="2" y="2" width="14" height="14" stroke="currentColor" stroke-width="2" rx="2"/>
-                        </svg>
-                        Deselect All
-                    </button>
-                    <span id="selectedCount" class="selected-count">0 selected</span>
-                </div>
-                <div class="controls-right">
-                    <select id="formatSelect" class="format-select" aria-label="Video quality">
-                        <option value="best">Best Quality</option>
-                        <option value="2160p">4K (2160p)</option>
-                        <option value="1440p">2K (1440p)</option>
-                        <option value="1080p">Full HD (1080p)</option>
-                        <option value="720p">HD (720p)</option>
-                        <option value="480p">SD (480p)</option>
-                        <option value="audio">Audio Only</option>
-                    </select>
-                    <button id="downloadSelectedBtn" class="btn-download" disabled aria-label="Download selected videos">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <path d="M9 2V12M9 12L5 8M9 12L13 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 16H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <span class="download-btn-text">Download Selected</span>
-                    </button>
-                </div>
-            </div>
+                <a href="facebook.html" class="tool-card neon-glow">
+                    <div class="tool-icon facebook">FB</div>
+                    <h3>Facebook</h3>
+                    <p>Public videos</p>
+                    <span class="tool-tag">Fast Download</span>
+                </a>
 
-            <!-- Video Grid -->
-            <div id="videoGrid" class="video-grid"></div>
+                <a href="twitter.html" class="tool-card neon-glow">
+                    <div class="tool-icon twitter">X</div>
+                    <h3>Twitter/X</h3>
+                    <p>Videos & GIFs</p>
+                    <span class="tool-tag">GIF Support</span>
+                </a>
 
-            <!-- Load More -->
-            <div id="loadMoreContainer" class="load-more-container" style="display: none;">
-                <button id="loadMoreBtn" class="btn-load-more">Load More Videos</button>
+                <a href="downloader.html" class="tool-card tool-card-primary neon-glow-strong">
+                    <div class="tool-icon all">ALL</div>
+                    <h3>All Platforms</h3>
+                    <p>Universal downloader</p>
+                    <span class="tool-tag-premium">⭐ Most Popular</span>
+                </a>
             </div>
-        </div>
-    </section>
-
-    <!-- Download Progress Section -->
-    <section id="progressSection" class="progress-section" style="display: none;">
-        <div class="container">
-            <div class="progress-header">
-                <h2>Download Progress</h2>
-                <button id="clearCompletedBtn" class="btn-control">Clear Completed</button>
-            </div>
-            <div id="progressList" class="progress-list"></div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features-section">
+    <section class="features-showcase">
         <div class="container">
-            <h2 class="section-title">Why Use Our All in One Video Downloader?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <h3>Lightning Fast Downloads</h3>
-                    <p>Our high quality video downloader processes multiple videos simultaneously. Download social media videos online at maximum speed with our optimized queue system.</p>
+            <h2 class="section-title-center">Why Choose Us?</h2>
+            <div class="features-showcase-grid">
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Queue-based downloads for maximum speed</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/>
-                            <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/>
-                        </svg>
-                    </div>
-                    <h3>Bulk Video Downloader</h3>
-                    <p>Download entire YouTube playlists and TikTok profiles in one click. Our multiple video downloader handles 500+ videos effortlessly without any app installation.</p>
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">🎯</div>
+                    <h3>High Quality</h3>
+                    <p>Up to 4K video downloads</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h3>No Login Required</h3>
-                    <p>Start downloading immediately. This free online video downloader works directly in your browser with no registration, no app installation, and no hidden fees.</p>
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">🔒</div>
+                    <h3>Private & Secure</h3>
+                    <p>No data stored or tracked</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <h3>Safe & Secure</h3>
-                    <p>Your privacy matters. Our browser based video downloader doesn't store your data or download history. All processing happens securely.</p>
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">📱</div>
+                    <h3>Mobile Friendly</h3>
+                    <p>Works on all devices</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
-                            <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h3>Multi-Platform Support</h3>
-                    <p>Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat, and Likee. One online video download tool for all platforms.</p>
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">🆓</div>
+                    <h3>100% Free</h3>
+                    <p>No hidden fees ever</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2v20M17 12H3M21 6H3M21 18H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h3>HD Quality Downloads</h3>
-                    <p>Choose from multiple quality options including 4K, Full HD, and HD. Get the best video quality available for any platform.</p>
+                <div class="feature-showcase-card neon-border">
+                    <div class="feature-icon-large">🚀</div>
+                    <h3>No Login</h3>
+                    <p>Start downloading instantly</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Supported Platforms -->
-    <section class="platforms-section">
+    <!-- CTA Section -->
+    <section class="cta-section">
         <div class="container">
-            <h2 class="section-title">Supported Platforms</h2>
-            <p class="section-subtitle">Download social media videos online from all major platforms</p>
-            <div class="platforms-grid">
-                <a href="youtube.html" class="platform-card">
-                    <div class="platform-icon">YT</div>
-                    <h3>YouTube Video Downloader</h3>
-                    <p>Download YouTube videos, playlists, and channels. Support for 4K quality.</p>
+            <div class="cta-content">
+                <h2>Ready to Start?</h2>
+                <p>Choose a platform and start downloading instantly</p>
+                <a href="downloader.html" class="cta-button neon-button">
+                    Try Universal Downloader →
                 </a>
-                <a href="tiktok.html" class="platform-card">
-                    <div class="platform-icon">TT</div>
-                    <h3>TikTok Video Downloader</h3>
-                    <p>Download TikTok videos and entire profiles without watermark.</p>
-                </a>
-                <a href="instagram.html" class="platform-card">
-                    <div class="platform-icon">IG</div>
-                    <h3>Instagram Video Downloader</h3>
-                    <p>Download Instagram reels, posts, stories, and IGTV videos.</p>
-                </a>
-                <a href="facebook.html" class="platform-card">
-                    <div class="platform-icon">FB</div>
-                    <h3>Facebook Video Downloader</h3>
-                    <p>Download public Facebook videos in high quality.</p>
-                </a>
-                <a href="twitter.html" class="platform-card">
-                    <div class="platform-icon">X</div>
-                    <h3>Twitter Video Downloader</h3>
-                    <p>Download Twitter/X videos and GIFs easily.</p>
-                </a>
-                <div class="platform-card">
-                    <div class="platform-icon">SC</div>
-                    <h3>Snapchat Downloader</h3>
-                    <p>Download public Snapchat videos and stories.</p>
-                </div>
-                <div class="platform-card">
-                    <div class="platform-icon">LK</div>
-                    <h3>Likee Video Downloader</h3>
-                    <p>Download Likee videos without watermark.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-it-works-section">
-        <div class="container">
-            <h2 class="section-title">How to Download Videos Without App</h2>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Copy Video URL</h3>
-                    <p>Go to YouTube, TikTok, Instagram, or any supported platform and copy the video link.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Paste URL</h3>
-                    <p>Paste the link in our online video downloader input field above.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Select Quality</h3>
-                    <p>Choose your preferred video quality (4K, Full HD, HD, or audio only).</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3>Download</h3>
-                    <p>Click download and get your video instantly. No login required!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="faq-section">
-        <div class="container">
-            <h2 class="section-title">Frequently Asked Questions</h2>
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h3>Is this online video downloader free?</h3>
-                    <p>Yes, our social media video downloader is completely free with no hidden charges. Download unlimited videos from any supported platform.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Do I need to install any app?</h3>
-                    <p>No, this is a browser based video downloader. Download videos without app installation directly from your web browser on any device.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Can I download YouTube playlists?</h3>
-                    <p>Yes, our YouTube playlist downloader supports bulk downloading of entire playlists with up to 500+ videos.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Is login required to download videos?</h3>
-                    <p>No login required. Our free online video downloader works instantly without any registration or sign-up process.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>What video quality can I download?</h3>
-                    <p>Our high quality video downloader supports 4K, Full HD (1080p), HD (720p), SD, and audio-only formats depending on source availability.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Can I download TikTok videos without watermark?</h3>
-                    <p>Our TikTok video downloader attempts to provide the best available quality. Watermark removal depends on TikTok's source video format.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Is it safe to use this video downloader?</h3>
-                    <p>Yes, our online video download tool is safe and secure. We don't store your videos or personal data. All processing happens in real-time.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>How many videos can I download at once?</h3>
-                    <p>Our multiple video downloader and bulk video downloader can process numerous videos simultaneously with our queue-based system.</p>
-                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer-welcome">
         <div class="container">
-            <div class="footer-grid">
+            <div class="footer-content">
                 <div class="footer-col">
                     <h4>Video Downloader</h4>
-                    <p>Free social media video downloader for all platforms. Fast, secure, and no login required.</p>
+                    <p>Free video downloader for all platforms</p>
                 </div>
                 <div class="footer-col">
                     <h4>Platforms</h4>
                     <ul>
-                        <li><a href="youtube.html">YouTube Downloader</a></li>
-                        <li><a href="tiktok.html">TikTok Downloader</a></li>
-                        <li><a href="instagram.html">Instagram Downloader</a></li>
-                        <li><a href="facebook.html">Facebook Downloader</a></li>
-                        <li><a href="twitter.html">Twitter Downloader</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Features</h4>
-                    <ul>
-                        <li><a href="#features">Bulk Downloads</a></li>
-                        <li><a href="#features">Playlist Support</a></li>
-                        <li><a href="#features">HD Quality</a></li>
-                        <li><a href="#features">No Registration</a></li>
+                        <li><a href="youtube.html">YouTube</a></li>
+                        <li><a href="tiktok.html">TikTok</a></li>
+                        <li><a href="instagram.html">Instagram</a></li>
+                        <li><a href="facebook.html">Facebook</a></li>
+                        <li><a href="twitter.html">Twitter</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h4>Legal</h4>
                     <ul>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms of Service</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="#">Privacy</a></li>
+                        <li><a href="#">Terms</a></li>
+                        <li><a href="#">Contact</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 VideoDownloader. All rights reserved. Free online video downloader for social media platforms.</p>
-                <p class="disclaimer">Disclaimer: This tool is for personal use only. Respect copyright laws and platform terms of service.</p>
+                <p>&copy; 2024 Video Downloader. All rights reserved.</p>
+                <p class="disclaimer">Respect copyright laws. Download only content you have permission to use.</p>
             </div>
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
 </body>
 </html>
