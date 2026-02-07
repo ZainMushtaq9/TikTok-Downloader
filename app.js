@@ -2,8 +2,8 @@
 // CONFIGURATION
 // ==========================================
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:8000/api/v1',
-    WS_URL: 'ws://localhost:8000/ws',
+    API_BASE_URL: 'https://tiktok-downloader-production-a1f0.up.railway.app/api/v1',
+    WS_URL: 'ws://tiktok-downloader-production-a1f0.up.railway.app/ws',
     MAX_VIDEOS_PER_PAGE: 20,
     RECONNECT_INTERVAL: 3000,
     REQUEST_TIMEOUT: 30000
