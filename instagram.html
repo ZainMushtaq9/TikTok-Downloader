@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Instagram video downloader online. Download Instagram reels, videos, and stories. Free Instagram reel downloader with no login required.">
+    <meta name="keywords" content="instagram video downloader, instagram reel downloader, download instagram video, instagram downloader">
+    <meta name="robots" content="index, follow">
+    <title>Instagram Video Downloader | Download Instagram Reels & Videos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="canonical" href="https://yoursite.com/instagram.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 4L4 10V22L16 28L28 22V10L16 4Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                        <path d="M12 14L20 14M16 10L16 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>VideoDownloader</span>
+                </a>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="youtube.html" class="nav-link">YouTube</a>
+                    <a href="tiktok.html" class="nav-link">TikTok</a>
+                    <a href="instagram.html" class="nav-link active">Instagram</a>
+                    <a href="about.html" class="nav-link">About</a>
+                </nav>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="index.html" class="mobile-menu-link">Home</a>
+        <a href="youtube.html" class="mobile-menu-link">YouTube</a>
+        <a href="tiktok.html" class="mobile-menu-link">TikTok</a>
+        <a href="instagram.html" class="mobile-menu-link">Instagram</a>
+        <a href="facebook.html" class="mobile-menu-link">Facebook</a>
+        <a href="twitter.html" class="mobile-menu-link">Twitter</a>
+        <a href="about.html" class="mobile-menu-link">About</a>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Instagram Video Downloader</h1>
+            <p class="hero-subtitle">Download Instagram reels, videos, and IGTV content easily. Our Instagram reel downloader helps you save Instagram videos in high quality with no login required.</p>
+            
+            <div class="url-input-container">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="urlInput" 
+                        class="url-input" 
+                        placeholder="Paste Instagram video, reel, or profile URL here..."
+                        autocomplete="off"
+                    />
+                    <button id="analyzeBtn" class="btn-analyze">
+                        <span class="btn-text">Download</span>
+                        <span class="btn-loader" style="display: none;">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="32" stroke-dashoffset="32">
+                                    <animate attributeName="stroke-dashoffset" dur="1s" from="32" to="0" repeatCount="indefinite"/>
+                                </circle>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                <div id="urlError" class="error-message" style="display: none;"></div>
+                <p class="input-hint">✓ Reels, videos, IGTV • ✓ HD quality • ✓ No registration</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="videoListSection" class="video-list-section" style="display: none;">
+        <div class="container">
+            <div id="playlistHeader" class="playlist-header" style="display: none;">
+                <h2 id="playlistTitle" class="playlist-title"></h2>
+                <p id="playlistInfo" class="playlist-info"></p>
+            </div>
+            <div class="controls-bar">
+                <div class="controls-left">
+                    <button id="selectAllBtn" class="btn-control"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" stroke="currentColor" stroke-width="2" rx="2"/><path d="M5 9L8 12L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Select All</button>
+                    <button id="deselectAllBtn" class="btn-control"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" stroke="currentColor" stroke-width="2" rx="2"/></svg>Deselect All</button>
+                    <span id="selectedCount" class="selected-count">0 selected</span>
+                </div>
+                <div class="controls-right">
+                    <select id="formatSelect" class="format-select">
+                        <option value="best">Best Quality</option>
+                        <option value="1080p">Full HD</option>
+                        <option value="720p">HD</option>
+                        <option value="audio">Audio Only</option>
+                    </select>
+                    <button id="downloadSelectedBtn" class="btn-download" disabled><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2V12M9 12L5 8M9 12L13 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 16H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="download-btn-text">Download Selected</span></button>
+                </div>
+            </div>
+            <div id="videoGrid" class="video-grid"></div>
+            <div id="loadMoreContainer" class="load-more-container" style="display: none;"><button id="loadMoreBtn" class="btn-load-more">Load More Videos</button></div>
+        </div>
+    </section>
+
+    <section id="progressSection" class="progress-section" style="display: none;">
+        <div class="container">
+            <div class="progress-header">
+                <h2>Download Progress</h2>
+                <button id="clearCompletedBtn" class="btn-control">Clear Completed</button>
+            </div>
+            <div id="progressList" class="progress-list"></div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Instagram Downloader Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <h3>Download Instagram Video</h3>
+                    <p>Download Instagram video content including posts, reels, and IGTV videos with our Instagram video downloader.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3>Instagram Reel Downloader</h3>
+                    <p>Save Instagram reels in high quality. Our Instagram reel downloader preserves original video quality.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Downloads</h3>
+                    <p>Instant Instagram video downloads with our optimized high quality video downloader engine.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔓</div>
+                    <h3>No Login Required</h3>
+                    <p>Download Instagram videos without logging in. Our browser based video downloader works instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Friendly</h3>
+                    <p>Works perfectly on phones and tablets. Download videos without app installation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💯</div>
+                    <h3>100% Free</h3>
+                    <p>Our Instagram downloader is completely free. No hidden fees or limitations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Instagram Downloader FAQ</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How to download Instagram video?</h3>
+                    <p>Copy the Instagram video link, paste it in our Instagram video downloader above, and click Download.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I download Instagram reels?</h3>
+                    <p>Yes! Our Instagram reel downloader supports downloading reels in their original quality.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is this Instagram downloader free?</h3>
+                    <p>Yes, our Instagram video downloader is completely free with no registration required.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I download private Instagram videos?</h3>
+                    <p>No, this tool only works with public Instagram content. Private videos require authentication.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What quality can I download?</h3>
+                    <p>Our Instagram downloader preserves the original quality of the video, typically up to Full HD (1080p).</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do I need an app?</h3>
+                    <p>No, this is a browser based video downloader. Download videos without app installation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col"><h4>Video Downloader</h4><p>Free Instagram video downloader and social media download tool.</p></div>
+                <div class="footer-col"><h4>Platforms</h4><ul><li><a href="youtube.html">YouTube</a></li><li><a href="tiktok.html">TikTok</a></li><li><a href="instagram.html">Instagram</a></li><li><a href="facebook.html">Facebook</a></li><li><a href="twitter.html">Twitter</a></li></ul></div>
+                <div class="footer-col"><h4>Resources</h4><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li></ul></div>
+                <div class="footer-col"><h4>Support</h4><ul><li><a href="contact.html">Contact</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 VideoDownloader. All rights reserved.</p><p class="disclaimer">Disclaimer: Respect copyright laws and Instagram's terms of service.</p></div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
