@@ -346,12 +346,6 @@ def progress_hook(d, job_id: str, session_id: str):
 # ==========================================
 # API ENDPOINTS
 # ==========================================
-@app.on_event("startup")
-async def startup_event():
-    """Start background workers"""
-    for _ in range(MAX_CONCURRENT_DOWNLOADS):
-        asyncio.create_task(download_worker())
-    logger.info(f"Started {MAX_CONCURRENT_DOWNLOADS} download workers")
 
 @app.get("/")
 async def root():
