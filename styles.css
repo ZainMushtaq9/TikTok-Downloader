@@ -44,7 +44,7 @@ body {
 
 /* THEME TOGGLE */
 .theme-toggle {
-    position: flexible; top: 35px; right: 15px; width: 45px; height: 45px; border-radius: 50%;
+    position: flexible; top: 5px; right: 15px; width: 45px; height: 45px; border-radius: 50%;
     background: var(--bg-card); border: 2px solid var(--border); cursor: pointer; z-index: 1001;
     font-size: 20px; display: flex; align-items: center; justify-content: center;
     transition: var(--transition); box-shadow: var(--shadow);
