@@ -1,0 +1,15 @@
+{# Reusable AdSense ad unit macro. Include this in any template with: {% include 'ads.html' %} #}
+{% if adsense_enabled %}
+<div class="ad-unit" style="max-width: 1000px; margin: 2rem auto; padding: 0 1rem; text-align: center;">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="{{ adsense_pub_id }}"
+        data-ad-slot="IN_CONTENT_AD_SLOT" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{% else %}
+<div class="ad-unit" style="max-width: 1000px; margin: 2rem auto; padding: 0 1rem; text-align: center;">
+    <div
+        style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: 8px; padding: 0.5rem; color: var(--text-muted); font-size: 0.7rem;">
+        📢 Sponsored
+    </div>
+</div>
+{% endif %}
