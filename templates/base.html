@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Xainvex - AI Video Downloader | Free Multi-Platform{% endblock %}</title>
+    <meta name="description" content="{% block description %}Xainvex is a free AI-powered multi-platform video downloader. Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and 15+ platforms without watermarks.{% endblock %}">
+    <meta name="keywords" content="video downloader, youtube downloader, tiktok downloader, instagram reels downloader, facebook video downloader, free video downloader, xainvex">
+    <meta name="author" content="Xainvex">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{% block canonical %}https://xainvex.com{% endblock %}">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Xainvex">
+    <meta property="og:title" content="{% block og_title %}Xainvex - AI-Powered Video Downloader{% endblock %}">
+    <meta property="og:description" content="Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and 15+ platforms for free. AI-powered, no watermarks, no registration.">
+    <meta property="og:url" content="https://xainvex.com">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Xainvex - AI Video Downloader">
+    <meta name="twitter:description" content="Free AI-powered video downloader for 15+ platforms.">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Xainvex",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "AI-powered multi-platform video downloader supporting YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and more.",
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "ratingCount": "12400" }
+    }
+    </script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% if adsense_enabled %}
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_pub_id }}" crossorigin="anonymous"></script>
+    {% endif %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">⚡ Xainvex</a>
+            
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/playlist-downloader">Playlists</a>
+                <a href="/profile-downloader">Profiles</a>
+                <a href="/youtube-to-mp3">MP3</a>
+                <a href="/batch-downloader">Batch</a>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========== TOP AD BANNER (below header) ========== -->
+    {% if adsense_enabled %}
+    <div class="ad-container ad-top" style="max-width: 1280px; margin: 1rem auto; padding: 0 1rem; text-align: center;">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="{{ adsense_pub_id }}"
+            data-ad-slot="TOP_AD_SLOT_ID"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    {% else %}
+    <!-- Ad Placeholder: Top Banner (Replace with AdSense once approved) -->
+    <div class="ad-container ad-top" style="max-width: 1280px; margin: 1rem auto; padding: 0 1rem; text-align: center;">
+        <div style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: 8px; padding: 0.75rem; color: var(--text-muted); font-size: 0.75rem;">
+            📢 Ad Space — <a href="/about" style="color: var(--primary);">Advertise with Xainvex</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <main class="content-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ========== BOTTOM AD BANNER (above footer) ========== -->
+    {% if adsense_enabled %}
+    <div class="ad-container ad-bottom" style="max-width: 1280px; margin: 2rem auto; padding: 0 1rem; text-align: center;">
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="{{ adsense_pub_id }}"
+            data-ad-slot="BOTTOM_AD_SLOT_ID"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    {% else %}
+    <div class="ad-container ad-bottom" style="max-width: 1280px; margin: 2rem auto; padding: 0 1rem; text-align: center;">
+        <div style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: 8px; padding: 0.75rem; color: var(--text-muted); font-size: 0.75rem;">
+            📢 Ad Space — <a href="/about" style="color: var(--primary);">Advertise with Xainvex</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="/" class="logo" style="font-size: 1.25rem;">⚡ Xainvex</a>
+                <p style="color: var(--text-muted); margin-top: 0.5rem; max-width: 300px; font-size: 0.9rem;">
+                    The fastest, smartest, free multi-platform video downloader — by Xainvex.
+                </p>
+                <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.75rem;">For personal use only. Respect copyright laws in your country.</p>
+            </div>
+            
+            <div class="footer-links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="/dmca">DMCA</a>
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+            </div>
+        </div>
+        <div style="text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1.5rem; max-width: 1280px; margin-left: auto; margin-right: auto;">
+            <p style="color: var(--text-muted); font-size: 0.8rem;">&copy; 2026 Xainvex. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Global JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

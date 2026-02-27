@@ -1,12 +1,6 @@
-fastapi
-uvicorn[standard]
-pydantic
+flask
 yt-dlp
-python-multipart
-websockets
-slowapi
-redis
-celery
-aiofiles
-python-jose[cryptography]
-passlib[bcrypt]
+requests
+google-generativeai
+gunicorn
+archiver

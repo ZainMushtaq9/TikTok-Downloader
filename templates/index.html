@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Xainvex - AI Video Downloader | YouTube TikTok Instagram Facebook{% endblock %}
+{% block description %}Download videos from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and 15+ platforms
+for free. AI-powered summaries, no watermarks, no login required.{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1><span class="text-gradient">AI-Powered</span> Video Download Engine</h1>
+    <p>Download video and audio from 15+ platforms instantly. No watermarks. No login. Fast, secure, and completely free
+        — powered by Xainvex AI.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste video link..." autocomplete="off"
+            value="{{ prefill_platform_url|default('') }}">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Fetch</button>
+    </div>
+
+    <div id="platform-badge" class="hidden" style="margin-top: 1rem; color: var(--primary); font-weight: 500;">
+    </div>
+
+    <!-- Download History -->
+    <div id="history-strip" class="hidden" style="margin-top: 2rem; overflow-x: auto; padding-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h4 style="color: var(--text-muted); font-size: 0.9rem;">Recent Downloads</h4>
+            <button
+                onclick="localStorage.removeItem('dl_history'); document.dispatchEvent(new Event('historyUpdated'));"
+                class="btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.7rem;">Clear</button>
+        </div>
+        <div id="history-container" style="display: flex; gap: 1rem;"></div>
+    </div>
+</section>
+
+<!-- Platform Support Icons -->
+<section style="max-width: 1000px; margin: 0 auto; text-align: center; padding: 0 1rem;">
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Supported Platforms</p>
+    <div class="platform-row">
+        <div class="platform-icon" title="YouTube"><i class="fa-brands fa-youtube" style="color: #ff0000;"></i></div>
+        <div class="platform-icon" title="TikTok"><i class="fa-brands fa-tiktok" style="color: #ffffff;"></i></div>
+        <div class="platform-icon" title="Instagram"><i class="fa-brands fa-instagram" style="color: #e1306c;"></i>
+        </div>
+        <div class="platform-icon" title="Facebook"><i class="fa-brands fa-facebook" style="color: #1877f2;"></i></div>
+        <div class="platform-icon" title="Twitter/X"><i class="fa-brands fa-x-twitter"></i></div>
+        <div class="platform-icon" title="Snapchat"><i class="fa-brands fa-snapchat" style="color: #fffc00;"></i></div>
+        <div class="platform-icon" title="Reddit"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i></div>
+        <div class="platform-icon" title="Twitch"><i class="fa-brands fa-twitch" style="color: #9146ff;"></i></div>
+        <div class="platform-icon" title="Pinterest"><i class="fa-brands fa-pinterest" style="color: #e60023;"></i>
+        </div>
+        <div class="platform-icon" title="LinkedIn"><i class="fa-brands fa-linkedin" style="color: #0a66c2;"></i></div>
+        <div class="platform-icon" title="Vimeo"><i class="fa-brands fa-vimeo-v" style="color: #1ab7ea;"></i></div>
+        <div class="platform-icon" title="+ More"><i class="fa-solid fa-plus"></i></div>
+    </div>
+</section>
+
+<!-- AI Info Card -->
+<section id="ai-card" class="ai-card hidden">
+    <div class="thumbnail-wrapper">
+        <img id="meta-thumb" src="" alt="Video Thumbnail">
+    </div>
+    <div class="meta-info">
+        <h3 id="meta-title">Video Title</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            By <span id="meta-uploader" style="color: var(--text-main); font-weight: 500;">Uploader Name</span>
+        </p>
+
+        <div class="ai-summary">
+            <span class="sparkle-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            <strong>AI Summary: </strong>
+            <span id="ai-summary-text" style="color: var(--text-muted);">Generating summary...</span>
+        </div>
+    </div>
+</section>
+
+<!-- Format Selector -->
+<section id="format-panel" class="hidden" style="max-width: 1000px; margin: 0 auto; padding: 0 1rem;">
+    <h3 style="margin-bottom: 1rem;"><span class="text-gradient">Select Quality</span></h3>
+    <div id="format-grid" class="format-grid"></div>
+
+    <div style="text-align: center; margin-top: 3rem;">
+        <button id="action-button" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 4rem;">
+            <i class="fa-solid fa-download"></i> Download to Device
+        </button>
+    </div>
+</section>
+
+<!-- Progress Container -->
+<section id="progress-container" class="progress-container hidden" style="max-width: 800px; margin: 3rem auto;">
+    <h3>Processing Download...</h3>
+    <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+    </div>
+    <div class="progress-stats">
+        <span id="progress-text">Connecting to servers...</span>
+        <span>Please do not close this window</span>
+    </div>
+</section>
+
+<!-- Pro Tools Grid -->
+<section style="max-width: 1280px; margin: 5rem auto; padding: 0 2rem;">
+    <h2 style="text-align: center; margin-bottom: 3rem;">Xainvex Pro Tools</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        <a href="/playlist-downloader" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-list text-gradient" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Playlist Downloader</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Download entire YouTube playlists as batch.</p>
+            </div>
+        </a>
+        <a href="/profile-downloader" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-users text-gradient" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Profile Downloader</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Download all videos from TikTok or Instagram
+                    profiles.</p>
+            </div>
+        </a>
+        <a href="/youtube-to-mp3" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-music text-gradient" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Audio Extractor</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Convert any video to high quality MP3.</p>
+            </div>
+        </a>
+        <a href="/watermark-remover" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-droplet-slash text-gradient" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Watermark Remover</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Clean TikTok videos without watermarks.</p>
+            </div>
+        </a>
+        <a href="/batch-downloader" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-wand-magic-sparkles text-gradient"
+                    style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">AI Batch Harvester</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">AI extracts every video link from any text.</p>
+            </div>
+        </a>
+        <a href="/thumbnail-downloader" style="text-decoration: none; color: inherit;">
+            <div style="background: var(--bg-card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); transition: transform 0.3s, border-color 0.3s; text-align: center;"
+                onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+                <i class="fa-solid fa-image text-gradient" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Thumbnail Grabber</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Extract HD cover images from any video.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- SEO FAQ Section -->
+<section style="max-width: 800px; margin: 3rem auto 5rem; padding: 0 2rem;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">Frequently Asked Questions</h2>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": "Is Xainvex free to use?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, Xainvex is 100% free. No registration, no hidden fees. We support downloads from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and more."}},
+            {"@type": "Question", "name": "How do I download videos?", "acceptedAnswer": {"@type": "Answer", "text": "Simply paste the video URL into the input box. Xainvex AI will auto-detect the platform, show you a summary, and let you choose quality before downloading."}},
+            {"@type": "Question", "name": "Can I download TikTok videos without watermark?", "acceptedAnswer": {"@type": "Answer", "text": "Yes! Xainvex automatically removes TikTok's watermark and delivers a clean MP4 file."}},
+            {"@type": "Question", "name": "Which platforms does Xainvex support?", "acceptedAnswer": {"@type": "Answer", "text": "YouTube, TikTok, Instagram, Facebook, Twitter/X, Snapchat, Reddit, Vimeo, Twitch, Pinterest, LinkedIn, Dailymotion, Likee, VK, and Bilibili."}},
+            {"@type": "Question", "name": "Is it safe to use?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. We never store your downloaded videos on our servers. All media streams directly from the platform to your device. No data is collected."}}
+        ]
+    }
+    </script>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <details
+            style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+            <summary style="font-weight: 600;">Is Xainvex free to use?</summary>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Yes, Xainvex is 100% free. No registration, no hidden
+                fees. We support downloads from YouTube, TikTok, Instagram, Facebook, Twitter, Snapchat and more.</p>
+        </details>
+        <details
+            style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+            <summary style="font-weight: 600;">How do I download videos?</summary>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Simply paste the video URL into the input box.
+                Xainvex AI will auto-detect the platform, show you a summary, and let you choose quality before
+                downloading.</p>
+        </details>
+        <details
+            style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+            <summary style="font-weight: 600;">Can I download TikTok videos without watermark?</summary>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Yes! Xainvex automatically removes TikTok's watermark
+                and delivers a clean MP4 file.</p>
+        </details>
+        <details
+            style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+            <summary style="font-weight: 600;">Which platforms does Xainvex support?</summary>
+            <p style="color: var(--text-muted); margin-top: 1rem;">YouTube, TikTok, Instagram, Facebook, Twitter/X,
+                Snapchat, Reddit, Vimeo, Twitch, Pinterest, LinkedIn, Dailymotion, Likee, VK, and Bilibili — 15+
+                platforms.</p>
+        </details>
+        <details
+            style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+            <summary style="font-weight: 600;">Is it safe to use?</summary>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Yes. We never store your downloaded videos on our
+                servers. All media streams directly from the platform to your device. No personal data is collected.</p>
+        </details>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/downloader.js') }}"></script>
+{% endblock %}

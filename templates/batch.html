@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Batch URL Extractor & Downloader{% endblock %}
+{% block description %}Paste text containing multiple video URLs and let AI extract and download them all at once.{%
+endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><span class="text-gradient">Batch URL</span> Harvester</h1>
+    <p>Paste an article, email, or unformatted text. Our AI will find every mention of a video link from YouTube,
+        TikTok, Instagram, etc.</p>
+
+    <div style="max-width: 800px; margin: 0 auto; margin-top: 2rem;">
+        <textarea id="batch-input" rows="8"
+            style="width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; color: var(--text-main); font-family: var(--font-body); font-size: 1rem; resize: vertical;"
+            placeholder="Paste any text containing links here..."></textarea>
+
+        <button id="extract-btn" class="btn-primary" style="margin-top: 1rem; width: 100%;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Extract URLs with AI
+        </button>
+    </div>
+
+    <div id="status-msg" class="hidden" style="margin-top: 1rem; color: var(--primary); font-weight: 500;">
+    </div>
+</section>
+
+<!-- Results list -->
+<section id="results-panel" class="hidden"
+    style="max-width: 800px; margin: 0 auto 5rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 2rem;">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <h3 id="found-count">Found 0 URLs</h3>
+        <button id="batch-download-btn" class="btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Download
+            All (MP4 1080p)</button>
+    </div>
+
+    <div id="url-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <!-- Injected by JS -->
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const extractBtn = document.getElementById('extract-btn');
+        const input = document.getElementById('batch-input');
+        const status = document.getElementById('status-msg');
+        const results = document.getElementById('results-panel');
+        const urlList = document.getElementById('url-list');
+
+        let extractedUrls = [];
+
+        extractBtn.addEventListener('click', async () => {
+            const text = input.value.trim();
+            if (!text) return;
+
+            status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI is scanning text...';
+            status.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/ai/extract-urls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await res.json();
+                extractedUrls = data.urls || [];
+
+                status.classList.add('hidden');
+
+                if (extractedUrls.length === 0) {
+                    status.innerHTML = 'No valid video URLs found in text.';
+                    status.classList.remove('hidden');
+                    status.className = 'text-warning';
+                    return;
+                }
+
+                document.getElementById('found-count').textContent = `Found ${extractedUrls.length} URLs`;
+                urlList.innerHTML = '';
+
+                extractedUrls.forEach((obj, i) => {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border);';
+
+                    row.innerHTML = `
+                        <div style="flex: 1; overflow: hidden;">
+                            <span style="display: inline-block; padding: 0.2rem 0.6rem; background: var(--bg-card); border-radius: 99px; font-size: 0.75rem; color: var(--text-muted); text-transform: capitalize; margin-right: 0.5rem;">${obj.platform || 'Unknown'}</span>
+                            <a href="${obj.url}" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all; font-size: 0.9rem;">${obj.url}</a>
+                        </div>
+                        <div id="batch-stat-${i}" style="margin-left: 1rem; font-size: 0.85rem; color: var(--text-muted);">Ready</div>
+                    `;
+                    urlList.appendChild(row);
+                });
+
+                results.classList.remove('hidden');
+
+            } catch (e) {
+                status.innerHTML = 'Error extracting URLs.';
+                status.className = 'text-danger';
+            }
+        });
+
+        document.getElementById('batch-download-btn').addEventListener('click', async () => {
+            document.getElementById('batch-download-btn').disabled = true;
+
+            for (let i = 0; i < extractedUrls.length; i++) {
+                const url = extractedUrls[i].url;
+                const stat = document.getElementById(`batch-stat-${i}`);
+
+                stat.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-warning"></i> Downloading...';
+
+                try {
+                    const a = document.createElement('a');
+                    a.href = `/api/download?url=${encodeURIComponent(url)}&format=mp4&quality=1080p`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    await new Promise(r => setTimeout(r, 3000));
+                    stat.innerHTML = '<i class="fa-solid fa-check text-success"></i> Done';
+                } catch (e) {
+                    stat.innerHTML = '<i class="fa-solid fa-xmark text-danger"></i> Failed';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

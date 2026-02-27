@@ -1,353 +1,270 @@
-"""
-Video Downloader Backend v5.0 - COMPLETE REWRITE
-All platforms working: YouTube, TikTok, Instagram, Facebook, Twitter, Likee
-"""
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel, validator
-from typing import List, Optional, Dict, Any
-from enum import Enum
-import yt_dlp
-import asyncio
-import uuid
+from flask import Flask, request, jsonify, Response, render_template, send_from_directory
+from config import Config
+from utils.url_normalizer import analyze_url
+from utils.downloader import get_metadata, get_playlist_data, download_stream
+from utils.ai_service import generate_summary, recommend_format, extract_urls_from_text
+from utils.rate_limiter import check_rate_limit
+from utils.health_checker import get_platform_health
 import os
-import re
-import logging
-from datetime import datetime
-from pathlib import Path
-from collections import defaultdict
-from urllib.parse import unquote
+import time
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+app = Flask(__name__)
+app.config.from_object(Config)
 
-PORT = int(os.getenv("PORT", "8000"))
-DOWNLOAD_DIR = Path("/tmp/downloads")
-DOWNLOAD_DIR.mkdir(exist_ok=True, parents=True)
+def get_client_ip():
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0]
+    return request.remote_addr
 
-MAX_CONCURRENT_DOWNLOADS = 1
-DOWNLOAD_DELAY_SECONDS = 5
-MAX_PLAYLIST_SIZE = 100
+@app.before_request
+def rate_limit_check():
+    # Only limit API download endpoints
+    if request.path == '/api/download':
+        ip = get_client_ip()
+        allowed, retry_after = check_rate_limit(ip, app.config['RATE_LIMIT_PER_HOUR'])
+        if not allowed:
+            return jsonify({
+                'error': 'Rate limit exceeded', 
+                'code': '429', 
+                'retry_after': retry_after
+            }), 429
 
-class Platform(str, Enum):
-    YOUTUBE = "YouTube"
-    TIKTOK = "TikTok"
-    INSTAGRAM = "Instagram"
-    FACEBOOK = "Facebook"
-    TWITTER = "Twitter"
-    LIKEE = "Likee"
-
-class VideoFormat(str, Enum):
-    BEST = "best"
-    AUDIO = "audio"
-
-class DownloadStatus(str, Enum):
-    QUEUED = "queued"
-    DOWNLOADING = "downloading"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-class AnalyzeRequest(BaseModel):
-    url: str
-
-class DownloadRequest(BaseModel):
-    session_id: str
-    video_ids: List[str]
-    format: VideoFormat = VideoFormat.BEST
-    quality: Optional[str] = None
-
-class VideoInfo(BaseModel):
-    id: str
-    title: str
-    thumbnail: str
-    duration: Optional[int] = None
-    platform: Platform
-    url: str
-    views: Optional[int] = None
-
-class AnalyzeResponse(BaseModel):
-    session_id: str
-    is_playlist: bool
-    total_videos: int
-    playlist_title: Optional[str] = None
-
-class VideosResponse(BaseModel):
-    videos: List[VideoInfo]
-    page: int
-    has_more: bool
-    total: int
-
-class DownloadJob(BaseModel):
-    job_id: str
-    video_id: str
-    status: DownloadStatus
-    position: int
-
-class DownloadResponse(BaseModel):
-    jobs: List[DownloadJob]
-    total_jobs: int
-    estimated_time: int
-
-class ProgressResponse(BaseModel):
-    job_id: str
-    status: DownloadStatus
-    progress: int
-    error: Optional[str] = None
-    file_path: Optional[str] = None
-
-app = FastAPI(title="Video Downloader", version="5.0.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-sessions = {}
-download_queue = asyncio.Queue()
-active_downloads = {}
-websocket_connections = defaultdict(list)
-
-def detect_platform(url: str) -> Platform:
-    url_lower = url.lower()
-    if 'youtube.com' in url_lower or 'youtu.be' in url_lower:
-        return Platform.YOUTUBE
-    elif 'tiktok.com' in url_lower:
-        return Platform.TIKTOK
-    elif 'instagram.com' in url_lower:
-        return Platform.INSTAGRAM
-    elif 'facebook.com' in url_lower or 'fb.watch' in url_lower:
-        return Platform.FACEBOOK
-    elif 'twitter.com' in url_lower or 'x.com' in url_lower:
-        return Platform.TWITTER
-    elif 'likee' in url_lower:
-        return Platform.LIKEE
-    return Platform.YOUTUBE
-
-def get_ydl_opts(platform: Platform, for_download: bool = False) -> dict:
-    opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'ignoreerrors': True,
-        'socket_timeout': 60,
-        'retries': 10,
-        'fragment_retries': 10,
-        'nocheckcertificate': True,
+# Inject AdSense config into all templates automatically
+@app.context_processor
+def inject_adsense():
+    return {
+        'adsense_enabled': Config.ADSENSE_ENABLED,
+        'adsense_pub_id': Config.ADSENSE_PUBLISHER_ID
     }
-    
-    if not for_download:
-        opts['extract_flat'] = 'in_playlist'
-    
-    if platform == Platform.YOUTUBE:
-        opts['format'] = 'best'
-    elif platform == Platform.INSTAGRAM:
-        opts['http_headers'] = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3 like Mac OS X) AppleWebKit/605.1.15'}
-    elif platform == Platform.TIKTOK:
-        opts['http_headers'] = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://www.tiktok.com/'}
-    else:
-        opts['format'] = 'best'
-    
-    return opts
 
-def clean_filename(title: str, job_id: str) -> str:
-    cleaned = ''.join(c for c in title if ord(c) < 128)
-    cleaned = re.sub(r'#\w+', '', cleaned)
-    cleaned = re.sub(r'[<>:"/\\|?*]', '', cleaned)
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip().rstrip('.')[:60]
-    return cleaned if cleaned and len(cleaned) >= 3 else f"video_{job_id[:8]}"
+# --- Page Routes ---
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-async def extract_info(url: str, platform: Platform) -> dict:
-    ydl_opts = get_ydl_opts(platform, for_download=False)
-    try:
-        def extract():
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                return ydl.extract_info(url, download=False)
-        info = await asyncio.to_thread(extract)
-        if not info:
-            raise Exception("Failed to extract")
-        return info
-    except Exception as e:
-        logger.error(f"Extract error: {e}")
-        raise HTTPException(status_code=400, detail=f"Failed to extract: {str(e)}")
+@app.route('/playlist-downloader')
+def playlist_downloader():
+    return render_template('playlist.html')
 
-def parse_video(entry: dict, platform: Platform, url: str) -> VideoInfo:
-    return VideoInfo(
-        id=entry.get('id', str(uuid.uuid4())[:8]),
-        title=(entry.get('title') or 'Unknown')[:100],
-        thumbnail=entry.get('thumbnail', ''),
-        duration=entry.get('duration'),
-        platform=platform,
-        url=entry.get('webpage_url') or entry.get('url') or url,
-        views=entry.get('view_count')
-    )
+@app.route('/profile-downloader')
+def profile_downloader():
+    return render_template('profile.html')
 
-async def notify_ws(session_id: str, message: dict):
-    for ws in websocket_connections.get(session_id, [])[:]:
-        try:
-            await ws.send_json(message)
-        except:
-            try:
-                websocket_connections[session_id].remove(ws)
-            except:
-                pass
+@app.route('/youtube-to-mp3')
+def youtube_mp3():
+    return render_template('youtube-to-mp3.html')
 
-async def download_worker():
-    logger.info("Worker started")
-    while True:
-        try:
-            job = await download_queue.get()
-            job_id, video, fmt, qual, sid, pos = job['job_id'], job['video'], job['format'], job['quality'], job['session_id'], job['position']
-            
-            if pos > 1:
-                for i in range(5):
-                    await asyncio.sleep(1)
-                    await notify_ws(sid, {'type': 'waiting', 'job_id': job_id, 'seconds_remaining': 5-i})
-            
-            logger.info(f"▶ Download {pos}: {video.title}")
-            active_downloads[job_id]['status'] = DownloadStatus.DOWNLOADING
-            await notify_ws(sid, {'type': 'progress', 'job_id': job_id, 'progress': 0})
-            
-            try:
-                file_path = await download_video(job_id, video, fmt, qual, sid)
-                active_downloads[job_id].update({'status': DownloadStatus.COMPLETED, 'progress': 100, 'file_path': file_path})
-                await notify_ws(sid, {'type': 'complete', 'job_id': job_id, 'file_path': file_path})
-                logger.info(f"✅ Complete: {video.title}")
-            except Exception as e:
-                logger.error(f"❌ Failed: {e}")
-                active_downloads[job_id].update({'status': DownloadStatus.FAILED, 'error': str(e)})
-                await notify_ws(sid, {'type': 'error', 'job_id': job_id, 'error': str(e)})
-            
-            download_queue.task_done()
-        except Exception as e:
-            logger.error(f"Worker error: {e}")
-            await asyncio.sleep(1)
+@app.route('/transcript-downloader')
+def transcript():
+    return render_template('transcript.html')
 
-async def download_video(job_id: str, video: VideoInfo, fmt: VideoFormat, qual: Optional[str], sid: str) -> str:
-    safe_title = clean_filename(video.title, job_id)
-    output = str(DOWNLOAD_DIR / f"{safe_title}.%(ext)s")
-    
-    opts = get_ydl_opts(video.platform, for_download=True)
-    opts['outtmpl'] = output
-    opts['progress_hooks'] = [lambda d: progress_hook(d, job_id, sid)]
-    
-    if fmt == VideoFormat.AUDIO:
-        opts['format'] = 'bestaudio/best'
-    elif qual and qual != 'best':
-        opts['format'] = f'bestvideo[height<={qual.replace("p","")}]+bestaudio/best'
-    
-    def download():
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            ydl.download([video.url])
-    
-    await asyncio.to_thread(download)
-    
-    files = list(DOWNLOAD_DIR.glob(f"{safe_title}.*"))
-    if files:
-        return f"/downloads/{files[0].name}"
-    raise Exception("File not found")
+@app.route('/batch-downloader')
+def batch_downloader():
+    return render_template('batch.html')
 
-def progress_hook(d, job_id: str, sid: str):
-    if d['status'] == 'downloading':
-        try:
-            prog = min(int((d.get('downloaded_bytes', 0) / (d.get('total_bytes') or d.get('total_bytes_estimate', 1))) * 100), 99)
-            active_downloads[job_id]['progress'] = prog
-            asyncio.create_task(notify_ws(sid, {'type': 'progress', 'job_id': job_id, 'progress': prog}))
-        except:
-            pass
+@app.route('/watermark-remover')
+def watermark():
+    return render_template('watermark.html')
 
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(download_worker())
-    logger.info(f"✅ Started on port {PORT}")
+@app.route('/thumbnail-downloader')
+def thumbnail():
+    return render_template('thumbnail.html')
 
-@app.get("/")
-async def root():
-    return {"status": "running", "version": "5.0"}
+@app.route('/gif-downloader')
+def gif_downloader():
+    return render_template('gif.html')
 
-@app.post("/api/v1/analyze", response_model=AnalyzeResponse)
-async def analyze(req: AnalyzeRequest):
-    platform = detect_platform(req.url)
-    logger.info(f"Analyze: {req.url} ({platform})")
-    
-    info = await extract_info(req.url, platform)
-    sid = str(uuid.uuid4())
-    is_pl = info.get('_type') in ['playlist', 'multi_video']
-    
-    if is_pl:
-        videos = [parse_video(e, platform, req.url) for e in info.get('entries', [])[:MAX_PLAYLIST_SIZE] if e and isinstance(e, dict)]
-        if not videos:
-            raise HTTPException(400, "No videos found")
-        sessions[sid] = {'platform': platform, 'is_playlist': True, 'playlist_title': info.get('title', 'Playlist'), 'videos': videos}
-        return AnalyzeResponse(session_id=sid, is_playlist=True, total_videos=len(videos), playlist_title=info.get('title'))
-    else:
-        video = parse_video(info, platform, req.url)
-        sessions[sid] = {'platform': platform, 'is_playlist': False, 'videos': [video]}
-        return AnalyzeResponse(session_id=sid, is_playlist=False, total_videos=1)
+# SEO & Legal Pages
+@app.route('/privacy')
+def privacy(): return render_template('privacy.html')
+@app.route('/terms')
+def terms(): return render_template('terms.html')
+@app.route('/dmca')
+def dmca(): return render_template('dmca.html')
+@app.route('/about')
+def about(): return render_template('about.html')
+@app.route('/contact')
+def contact(): return render_template('contact.html')
 
-@app.get("/api/v1/videos/{session_id}", response_model=VideosResponse)
-async def get_videos(session_id: str, page: int = 1, limit: int = 20):
-    if session_id not in sessions:
-        raise HTTPException(404, "Session not found")
-    videos = sessions[session_id]['videos']
-    start, end = (page-1)*limit, page*limit
-    return VideosResponse(videos=videos[start:end], page=page, has_more=end<len(videos), total=len(videos))
+# Catch-all for SEO tool pages (like /youtube-video-downloader)
+@app.route('/<platform>-video-downloader')
+def platform_tool(platform):
+    return render_template('index.html', prefill_platform=platform)
 
-@app.post("/api/v1/download", response_model=DownloadResponse)
-async def download(req: DownloadRequest):
-    if req.session_id not in sessions:
-        raise HTTPException(404, "Session not found")
-    
-    videos = {v.id: v for v in sessions[req.session_id]['videos']}
-    jobs = []
-    
-    for pos, vid_id in enumerate(req.video_ids, 1):
-        if vid_id not in videos:
-            continue
+# Static files mapping
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='text/xml')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
+
+
+# --- API Routes ---
+@app.route('/api/detect', methods=['POST'])
+def api_detect():
+    data = request.json
+    if not data:
+        return jsonify({'error': 'Invalid JSON'}), 400
+    url = data.get('url')
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
         
-        job_id = str(uuid.uuid4())
-        await download_queue.put({
-            'job_id': job_id, 'video': videos[vid_id], 'format': req.format,
-            'quality': req.quality, 'session_id': req.session_id, 'position': pos
+    analysis = analyze_url(url)
+    return jsonify(analysis)
+
+@app.route('/api/metadata', methods=['POST'])
+def api_metadata():
+    data = request.json
+    if not data:
+        return jsonify({'error': 'Invalid request body'}), 400
+
+    url = data.get('url')
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
+
+    try:
+        analysis = analyze_url(url)
+        
+        if analysis['platform'] == 'unknown':
+            return jsonify({'error': 'Unsupported platform', 'platform': 'unknown'}), 400
+        
+        # Use threading to enforce a HARD 10-second timeout on metadata fetching
+        # This ensures the frontend NEVER hangs, even if Instagram/Facebook block us
+        import threading
+        result_holder = [None]
+        
+        def fetch_meta():
+            result_holder[0] = get_metadata(analysis['url'], analysis['platform'])
+        
+        thread = threading.Thread(target=fetch_meta)
+        thread.start()
+        thread.join(timeout=10)  # Wait max 10 seconds
+        
+        meta = result_holder[0]
+        
+        platform_name = analysis['platform'].capitalize()
+        
+        if not meta:
+            # Return fallback that still shows the format selector
+            return jsonify({
+                'title': f'{platform_name} Video',
+                'uploader': platform_name,
+                'thumbnail': '',
+                'duration': 0,
+                'formats': [
+                    {'format_id': 'best', 'ext': 'mp4', 'resolution': '1080p', 'size': 'Auto', 'vcodec': 'h264', 'acodec': 'aac'},
+                    {'format_id': 'good', 'ext': 'mp4', 'resolution': '720p', 'size': 'Auto', 'vcodec': 'h264', 'acodec': 'aac'},
+                    {'format_id': 'fast', 'ext': 'mp4', 'resolution': '480p', 'size': 'Auto', 'vcodec': 'h264', 'acodec': 'aac'},
+                    {'format_id': 'audio', 'ext': 'mp3', 'resolution': 'Audio', 'size': 'Auto', 'vcodec': 'none', 'acodec': 'mp3'}
+                ],
+                'aiSummary': f'{platform_name} video detected. Select quality and download below.',
+                'recommendation': {'format': 'MP4', 'quality': '1080p', 'reason': 'Best quality for most devices.'},
+                'platform': analysis['platform']
+            })
+            
+        # Generate AI summary (won't crash even without API key)
+        ai_summary = generate_summary(meta.get('title', ''), "")
+        
+        # Generate format recommendation
+        duration = meta.get('duration', 0)
+        duration_str = f"{duration//60}:{duration%60:02d}" if duration else "Unknown"
+        recommendation = recommend_format(analysis['platform'], meta.get('title', ''), duration_str)
+        
+        return jsonify({
+            **meta,
+            'aiSummary': ai_summary,
+            'recommendation': recommendation,
+            'platform': analysis['platform']
         })
+    except Exception as e:
+        print(f"Metadata API error: {e}")
+        return jsonify({'error': str(e), 'platform': 'unknown'}), 500
+
+@app.route('/api/download', methods=['POST', 'GET'])
+def api_download():
+    # Support GET for direct browser downloads, POST for XHR
+    if request.method == 'POST':
+        data = request.json
+        url = data.get('url') if data else None
+        format_type = data.get('format', 'mp4') if data else 'mp4'
+        quality = data.get('quality', '1080') if data else '1080'
+    else:
+        url = request.args.get('url')
+        format_type = request.args.get('format', 'mp4')
+        quality = request.args.get('quality', '1080')
         
-        active_downloads[job_id] = {'status': DownloadStatus.QUEUED, 'progress': 0, 'position': pos}
-        jobs.append(DownloadJob(job_id=job_id, video_id=vid_id, status=DownloadStatus.QUEUED, position=pos))
-    
-    return DownloadResponse(jobs=jobs, total_jobs=len(jobs), estimated_time=(len(jobs)-1)*5 if len(jobs)>1 else 0)
-
-@app.get("/api/v1/progress/{job_id}", response_model=ProgressResponse)
-async def progress(job_id: str):
-    if job_id not in active_downloads:
-        raise HTTPException(404, "Job not found")
-    j = active_downloads[job_id]
-    return ProgressResponse(job_id=job_id, status=j['status'], progress=j.get('progress', 0), error=j.get('error'), file_path=j.get('file_path'))
-
-@app.websocket("/ws/{session_id}")
-async def ws(websocket: WebSocket, session_id: str):
-    await websocket.accept()
-    websocket_connections[session_id].append(websocket)
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
+        
     try:
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        try:
-            websocket_connections[session_id].remove(websocket)
-        except:
-            pass
+        analysis = analyze_url(url)
+        platform = analysis['platform']
+        
+        # Spawn yt-dlp
+        process = download_stream(analysis['url'], format_type, quality, platform)
+        
+        ext = format_type if format_type in ['mp4', 'mp3', 'webm', 'm4a'] else 'mp4'
+        filename = f"xainvex_{int(time.time())}.{ext}"
+        
+        # Stream the output directly to the client
+        def generate():
+            while True:
+                chunk = process.stdout.read(8192)
+                if not chunk:
+                    break
+                yield chunk
+            process.wait()
+                
+        return Response(
+            generate(),
+            mimetype=f'video/{ext}' if ext != 'mp3' else 'audio/mpeg',
+            headers={
+                'Content-Disposition': f'attachment; filename="{filename}"'
+            }
+        )
+    except Exception as e:
+        print(f"Download error: {e}")
+        return jsonify({'error': str(e)}), 500
 
-@app.get("/downloads/{filename:path}")
-async def dl_file(filename: str):
-    path = DOWNLOAD_DIR / unquote(filename)
-    if not path.exists():
-        files = list(DOWNLOAD_DIR.glob(f"*{unquote(filename).split('.')[0][:20]}*"))
-        path = files[0] if files else None
-    if not path or not path.exists():
-        raise HTTPException(404, "File not found")
-    return FileResponse(path, filename=path.name, media_type='application/octet-stream')
+@app.route('/api/playlist/fetch', methods=['POST'])
+def api_playlist_fetch():
+    data = request.json
+    if not data:
+        return jsonify({'error': 'Invalid request body'}), 400
+    
+    url = data.get('url')
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
+    
+    try:
+        analysis = analyze_url(url)
+        playlist_data = get_playlist_data(analysis['url'])
+        if not playlist_data:
+            return jsonify({'error': 'Failed to fetch playlist/profile. The content may be private or the platform may require authentication.'}), 400
+            
+        return jsonify(playlist_data)
+    except Exception as e:
+        print(f"Playlist fetch error: {e}")
+        return jsonify({'error': str(e)}), 500
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+@app.route('/api/ai/extract-urls', methods=['POST'])
+def api_extract_urls():
+    data = request.json
+    if not data:
+        return jsonify({'error': 'Invalid request body'}), 400
+    
+    text = data.get('text', '')
+    if not text.strip():
+        return jsonify({'urls': []}), 200
+    
+    urls = extract_urls_from_text(text)
+    return jsonify({'urls': urls})
+
+@app.route('/api/health')
+def api_health():
+    return jsonify({'platforms': get_platform_health()})
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

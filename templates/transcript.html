@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}YouTube Transcript Extractor - Download Subtitles{% endblock %}
+{% block description %}Extract transcripts and subtitles from YouTube videos. Download as plain text or read directly
+online.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><i class="fa-solid fa-closed-captioning text-gradient"></i> Transcript Extractor</h1>
+    <p>Get the full text transcript of any YouTube video in seconds.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste YouTube link here..." autocomplete="off">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Extract</button>
+    </div>
+</section>
+
+<section id="result-panel" class="hidden" style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 2rem;">
+        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-file-lines text-gradient"></i> Subtitles Support Limited
+        </h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Direct subtitle download requires specific yt-dlp
+            configurations. Instead, we recommend using audio extraction. In future phases, exact transcript downloads
+            will be available.</p>
+
+        <a href="/youtube-to-mp3" class="btn-primary" style="text-decoration: none; display: inline-block;">
+            Take me to Audio Extractor
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('url-input');
+        let typingTimer;
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            if (input.value.length > 5) {
+                typingTimer = setTimeout(() => {
+                    document.getElementById('result-panel').classList.remove('hidden');
+                }, 800);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Twitter & Reddit GIF Downloader{% endblock %}
+{% block description %}Download animated GIFs or MP4 conversions from Twitter, X, Reddit, and Imgur.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><span class="text-gradient">GIF</span> Downloader</h1>
+    <p>Convert Twitter and Reddit video threads into lightweight GIFs or looping MP4s.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste Twitter/Reddit link here..." autocomplete="off">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Fetch</button>
+    </div>
+</section>
+
+<section id="result-panel" class="hidden" style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 2rem;">
+        <img id="thumb-preview" src=""
+            style="width: 100%; max-width: 400px; border-radius: 12px; margin-bottom: 2rem;" />
+
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Ready to download as repeating MP4 (Twitter's native
+            GIF format).</p>
+
+        <div>
+            <button id="action-button-gif" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 4rem;">
+                <i class="fa-solid fa-download"></i> Save as MP4
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('url-input');
+
+        let typingTimer;
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            const url = input.value.trim();
+            if (url.length > 5 && url.includes('.')) {
+                typingTimer = setTimeout(() => fetchMeta(url), 500);
+            }
+        });
+
+        async function fetchMeta(url) {
+            try {
+                const res = await fetch('/api/metadata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+
+                if (data.thumbnail) {
+                    document.getElementById('thumb-preview').src = data.thumbnail;
+                    document.getElementById('result-panel').classList.remove('hidden');
+                }
+            } catch (e) { }
+        }
+
+        document.getElementById('action-button-gif').addEventListener('click', () => {
+            const url = input.value.trim();
+            if (!url) return;
+
+            const a = document.createElement('a');
+            a.href = `/api/download?url=${encodeURIComponent(url)}&format=mp4&quality=720p`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    });
+</script>
+{% endblock %}

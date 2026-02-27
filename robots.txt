@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://www.aiclinix.online/sitemap.xml
-
-# Disallow admin or private areas (if any)
 Disallow: /api/
-Disallow: /admin/
+
+Sitemap: https://xainvex.com/sitemap.xml

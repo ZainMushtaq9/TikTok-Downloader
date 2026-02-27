@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - Xainvex{% endblock %}
+
+{% block content %}
+<section
+    style="max-width: 800px; margin: 4rem auto; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border);">
+    <h1 style="margin-bottom: 2rem; font-size: 2.5rem;"><span class="text-gradient">Contact</span> Us</h1>
+
+    <div style="color: var(--text-muted); line-height: 1.8;">
+        <p>Have a question or noticed a bug with a specific platform? We'd love to hear from you.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">General Inquiries</h3>
+        <p>Email us at: <strong>hello@Xainvex.example.com</strong></p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">Bug Reports</h3>
+        <p>If a specific URL isn't working, please include the URL in your email and the error message you received.
+            Platforms update their code frequently, and we roll out patches rapidly once notified.</p>
+        <p>Email bug reports to: <strong>support@Xainvex.example.com</strong></p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">DMCA / Legal</h3>
+        <p>Please refer to our <a href="/dmca" style="color: var(--primary);">DMCA Policy</a> page for instructions on
+            takedown requests.</p>
+    </div>
+</section>
+{% endblock %}

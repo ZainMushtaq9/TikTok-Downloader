@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Video Thumbnail Downloader{% endblock %}
+{% block description %}Download high-resolution HD thumbnails from YouTube videos and Instagram posts safely and
+securely.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><span class="text-gradient">Thumbnail</span> Grabber</h1>
+    <p>Extract full 4K and 1080p HD cover images.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste video link here..." autocomplete="off">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Extract</button>
+    </div>
+</section>
+
+<section id="result-panel" class="hidden" style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 2rem;">
+        <img id="thumb-preview" src=""
+            style="width: 100%; max-width: 600px; border-radius: 12px; margin-bottom: 2rem;" />
+
+        <div>
+            <a id="dl-link" href="#" target="_blank" download="thumbnail.jpg" class="btn-primary"
+                style="text-decoration: none; padding: 1rem 3rem;">
+                <i class="fa-solid fa-download"></i> Download HD Image
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('url-input');
+
+        let typingTimer;
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            const url = input.value.trim();
+            if (url.length > 5 && url.includes('.')) {
+                typingTimer = setTimeout(() => fetchMeta(url), 500);
+            }
+        });
+
+        async function fetchMeta(url) {
+            try {
+                const res = await fetch('/api/metadata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+
+                if (data.thumbnail) {
+                    // Usually you want maxresdefault for YT, yt-dlp gives the best it can find
+                    let thumbUrl = data.thumbnail;
+                    if (thumbUrl.includes('hqdefault.jpg')) {
+                        thumbUrl = thumbUrl.replace('hqdefault.jpg', 'maxresdefault.jpg');
+                    }
+
+                    document.getElementById('thumb-preview').src = thumbUrl;
+                    document.getElementById('dl-link').href = thumbUrl;
+                    document.getElementById('result-panel').classList.remove('hidden');
+                }
+            } catch (e) { }
+        }
+    });
+</script>
+{% endblock %}

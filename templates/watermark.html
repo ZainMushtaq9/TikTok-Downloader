@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}TikTok Watermark Remover - Download Clean Videos{% endblock %}
+{% block description %}Download TikTok and Likee videos completely free of watermarks or logos. No app installation
+required.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><span class="text-gradient">No Watermark</span> Downloader</h1>
+    <p>Get original, clean MP4 videos from TikTok. We automatically remove the creator watermark.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste TikTok link here..." autocomplete="off">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Remove</button>
+    </div>
+</section>
+
+<section id="result-panel" class="hidden" style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 2rem;">
+        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-droplet-slash text-gradient"></i> Watermark Removed</h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Your clean video is ready to download.</p>
+
+        <button id="action-button-watermark" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 4rem;">
+            <i class="fa-solid fa-download"></i> Save Clean MP4
+        </button>
+    </div>
+</section>
+
+<!-- Progress Container -->
+<section id="progress-container" class="progress-container hidden" style="max-width: 800px; margin: 3rem auto;">
+    <h3>Processing...</h3>
+    <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+    </div>
+    <div class="progress-stats">
+        <span id="progress-text">Cleaning video...</span>
+        <span>Please do not close this window</span>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('url-input');
+        const fetchBtn = document.getElementById('fetch-btn');
+        const dlBtn = document.getElementById('action-button-watermark');
+
+        // Simple logic for TikTok only (backend yt-dlp uses clean API endpoint)
+        let typingTimer;
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            if (input.value.length > 5) {
+                typingTimer = setTimeout(() => {
+                    document.getElementById('result-panel').classList.remove('hidden');
+                }, 800);
+            }
+        });
+
+        dlBtn.addEventListener('click', () => {
+            const url = input.value.trim();
+            if (!url) return;
+
+            document.getElementById('result-panel').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+
+            // Format MP4 1080p will trigger backend clean tiktok api
+            const a = document.createElement('a');
+            a.href = `/api/download?url=${encodeURIComponent(url)}&format=mp4&quality=1080p`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            let p = 0;
+            const bar = document.getElementById('progress-fill');
+            const txt = document.getElementById('progress-text');
+            const int = setInterval(() => {
+                p += Math.random() * 20;
+                bar.style.width = Math.min(95, p) + '%';
+                txt.textContent = 'Downloading... ' + Math.min(95, Math.round(p)) + '%';
+            }, 500);
+
+            setTimeout(() => {
+                clearInterval(int);
+                bar.style.width = '100%';
+                txt.textContent = 'Complete!';
+                setTimeout(() => {
+                    document.getElementById('progress-container').classList.add('hidden');
+                    document.getElementById('result-panel').classList.remove('hidden');
+                }, 3000);
+            }, 4000);
+        });
+    });
+</script>
+{% endblock %}

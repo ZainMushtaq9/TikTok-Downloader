@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - Xainvex{% endblock %}
+
+{% block content %}
+<section
+    style="max-width: 800px; margin: 4rem auto; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border);">
+    <h1 style="margin-bottom: 2rem; font-size: 2.5rem;">Privacy <span class="text-gradient">Policy</span></h1>
+
+    <div style="color: var(--text-muted); line-height: 1.8;">
+        <p><strong>Last Updated:</strong> February 2026</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">1. Information We Collect</h3>
+        <p>We do not require user registration. The only data we collect automatically is standard web analytics via
+            Google Analytics, such as IP address (anonymised), browser type, and timestamps for performance monitoring
+            and AdSense compliance.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">2. Video Downloads</h3>
+        <p>We <strong>do not store</strong> any videos downloaded through our service. All media is streamed directly
+            from the host platform (YouTube, TikTok, etc.) to your device. We do not keep logs of which specific URLs
+            you download.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">3. Cookies</h3>
+        <p>We use local storage strictly for functional purposes (e.g. saving your theme preference and local download
+            history). Third-party vendors like Google use cookies to serve ads based on your prior visits. You can opt
+            out of personalized advertising via Google Ads Settings.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">4. Third Party Links</h3>
+        <p>Our AI extraction tool generates summaries and metadata from urls. We send only the text metadata to
+            Anthropic/Google AI services; we do not send any identifiable user data.</p>
+
+        <h3 style="color: var(--text-main); margin-top: 2rem;">5. Contact Us</h3>
+        <p>If you have any questions regarding this policy, please email: privacy@Xainvex.example.com</p>
+    </div>
+</section>
+{% endblock %}

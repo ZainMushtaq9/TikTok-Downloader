@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Environment secrets — NEVER push this to GitHub
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

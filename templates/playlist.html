@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Playlist Downloader - Download Entire Playlists Free{% endblock %}
+{% block description %}Download full YouTube, Vimeo, and Bilibili playlists as MP4 or MP3. Batch download multiple
+videos at once.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><span class="text-gradient">Playlist</span> Downloader</h1>
+    <p>Download entire playlists from YouTube, Vimeo, Twitch and more. Batch process up to 500 videos at once.</p>
+
+    <div class="input-group">
+        <input type="text" id="playlist-input" placeholder="Paste playlist URL here..." autocomplete="off">
+        <button id="fetch-playlist-btn" class="btn-primary">Fetch</button>
+    </div>
+
+    <div id="playlist-status" class="hidden" style="margin-top: 1rem; color: var(--primary); font-weight: 500;">
+    </div>
+</section>
+
+<section id="playlist-card" class="hidden"
+    style="max-width: 1000px; margin: 0 auto 2rem; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 2rem;">
+        <div>
+            <h2 id="pl-title" style="margin-bottom: 0.5rem;">Playlist Title</h2>
+            <p style="color: var(--text-muted);">By <span id="pl-uploader" style="color: var(--text-main);">Channel
+                    Name</span> • <span id="pl-count">0</span> videos</p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <select id="pl-format" class="btn-secondary" style="background: var(--bg-input);">
+                <option value="mp4,1080p">MP4 1080p</option>
+                <option value="mp4,720p">MP4 720p</option>
+                <option value="mp3,192k">MP3 Audio</option>
+            </select>
+            <button id="pl-download-selected" class="btn-primary" disabled><i class="fa-solid fa-download"></i> Download
+                Selected</button>
+        </div>
+    </div>
+
+    <div
+        style="margin-top: 2rem; display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <button id="pl-select-all" class="btn-secondary" style="padding: 0.5rem 1rem;">Select All</button>
+        <button id="pl-deselect-all" class="btn-secondary" style="padding: 0.5rem 1rem;">Deselect All</button>
+    </div>
+
+    <div id="pl-queue"
+        style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+        <!-- Queue items injected via JS -->
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/playlist.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}YouTube to MP3 Converter - Fast & Free{% endblock %}
+{% block description %}Convert YouTube videos to high quality MP3 audio up to 320kbps. Fast, free, and secure
+converter.{% endblock %}
+
+{% block content %}
+<section class="hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+    <h1><i class="fa-solid fa-music text-gradient"></i> YouTube to MP3</h1>
+    <p>Convert any YouTube video to high-quality MP3 instantly.</p>
+
+    <div class="input-group">
+        <input type="text" id="url-input" placeholder="Paste YouTube link here..." autocomplete="off">
+        <button id="fetch-btn" class="btn-primary" style="display: none;">Convert</button>
+    </div>
+
+    <div id="platform-badge" class="hidden" style="margin-top: 1rem; color: var(--primary); font-weight: 500;">
+    </div>
+</section>
+
+<!-- AI Info Card (Hidden by default) -->
+<section id="ai-card" class="ai-card hidden">
+    <div class="thumbnail-wrapper">
+        <img id="meta-thumb" src="" alt="Video Thumbnail">
+    </div>
+    <div class="meta-info">
+        <h3 id="meta-title">Video Title</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            By <span id="meta-uploader" style="color: var(--text-main); font-weight: 500;">Uploader Name</span>
+        </p>
+    </div>
+</section>
+
+<!-- Format Selector -->
+<section id="format-panel" class="hidden"
+    style="max-width: 1000px; margin: 0 auto; padding: 0 1rem; text-align: center;">
+    <h3 style="margin-bottom: 1rem;">Select Audio Quality</h3>
+    <div id="format-grid" class="format-grid"
+        style="grid-template-columns: repeat(3, 1fr) !important; max-width: 600px; margin: 0 auto;">
+        <div class="format-card selected" onclick="selectFormat(this, '320k')">
+            <h4>320kbps</h4>
+            <p>MP3 (Best)</p>
+        </div>
+        <div class="format-card" onclick="selectFormat(this, '256k')">
+            <h4>256kbps</h4>
+            <p>MP3 (Good)</p>
+        </div>
+        <div class="format-card" onclick="selectFormat(this, '192k')">
+            <h4>192kbps</h4>
+            <p>MP3 (Standard)</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 3rem;">
+        <button id="action-button-mp3" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 4rem;">
+            <i class="fa-solid fa-download"></i> Download MP3
+        </button>
+    </div>
+</section>
+
+<!-- Progress Container -->
+<section id="progress-container" class="progress-container hidden" style="max-width: 800px; margin: 3rem auto;">
+    <h3>Converting to MP3...</h3>
+    <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-bar-fill"></div>
+    </div>
+    <div class="progress-stats">
+        <span id="progress-text">Extracting audio...</span>
+        <span>Please do not close this window</span>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function selectFormat(el, kbps) {
+        document.querySelectorAll('.format-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        window.selectedKbps = kbps;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.selectedKbps = '192k'; // Default
+        const input = document.getElementById('url-input');
+
+        let typingTimer;
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimer);
+            const url = input.value.trim();
+            if (url.length > 5 && url.includes('.')) {
+                typingTimer = setTimeout(() => fetchMeta(url), 500);
+            }
+        });
+
+        async function fetchMeta(url) {
+            document.getElementById('platform-badge').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing...';
+            document.getElementById('platform-badge').classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/metadata', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+
+                document.getElementById('platform-badge').innerHTML = 'Ready to Convert';
+                document.getElementById('meta-thumb').src = data.thumbnail;
+                document.getElementById('meta-title').textContent = data.title;
+                document.getElementById('meta-uploader').textContent = data.uploader;
+
+                document.getElementById('ai-card').classList.remove('hidden');
+                document.getElementById('format-panel').classList.remove('hidden');
+            } catch (e) { }
+        }
+
+        document.getElementById('action-button-mp3').addEventListener('click', () => {
+            const url = input.value.trim();
+            if (!url) return;
+
+            document.getElementById('format-panel').classList.add('hidden');
+            document.getElementById('progress-container').classList.remove('hidden');
+
+            // Trigger download
+            const a = document.createElement('a');
+            a.href = `/api/download?url=${encodeURIComponent(url)}&format=mp3&quality=${window.selectedKbps}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Sim Progress
+            let p = 0;
+            const bar = document.getElementById('progress-fill');
+            const txt = document.getElementById('progress-text');
+            const int = setInterval(() => {
+                p += Math.random() * 20;
+                bar.style.width = Math.min(95, p) + '%';
+                txt.textContent = 'Converting... ' + Math.min(95, Math.round(p)) + '%';
+            }, 800);
+
+            setTimeout(() => {
+                clearInterval(int);
+                bar.style.width = '100%';
+                txt.textContent = 'Complete!';
+                setTimeout(() => {
+                    document.getElementById('progress-container').classList.add('hidden');
+                    document.getElementById('format-panel').classList.remove('hidden');
+                }, 3000);
+            }, 6000);
+        });
+    });
+</script>
+{% endblock %}
